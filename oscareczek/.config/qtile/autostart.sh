@@ -1,8 +1,14 @@
 #!/bin/sh
-feh --bg-fill ~/Obrazy/82991852_p2.jpg
-xmodmap ~/.Xmodmap
-nm-applet&
-blueman-applet&
-xfce4-clipman&
-/usr/lib/geoclue-2.0/demos/agent&
-gammastep-indicator&
+
+#compton -b --config ~/.config/compton/compton.conf &
+nitrogen --restore &
+#xsettingsd &
+# xfce4-power-manager &
+# volumeicon &
+nm-applet &
+/usr/lib/geoclue-2.0/demos/agent &
+gammastep-indicator -m drm &
+setxkbmap pl
+light-locker --lock-on-suspend &
+wal -i we0w4aea87f51.jpg
+exec expressvpn connect &
