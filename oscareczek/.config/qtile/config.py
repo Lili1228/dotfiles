@@ -1,15 +1,16 @@
-from libqtile.config import Key, Screen, Group, Drag, Click
-from libqtile.command import lazy
-from libqtile import layout, bar, widget, hook
+from typing import List  # noqa: F401
+
+from libqtile import bar, layout, widget, hook
+from libqtile.config import Click, Drag, Group, Key, Match, Screen
+from libqtile.lazy import lazy
+from libqtile.utils import guess_terminal
 import os
 import subprocess
 
+mod = "mod4"
+terminal = guess_terminal()
+
 from Xlib import display
-
-alt = 'mod1'
-win = 'mod4'
-
-home = os.environ.get('HOME')
 
 d = display.Display()
 s = d.screen()
@@ -21,39 +22,56 @@ for output in res['outputs']:
     if mon['num_preferred']:
         num_screens += 1
 
-# -----KEYBINDS------
 keys = [
-    # MonadTall Bindings
-    Key([win], 'h', lazy.layout.left()),
-    Key([win], 'l', lazy.layout.right()),
-    Key([win], 'j', lazy.layout.down()),
-    Key([win], 'k', lazy.layout.up()),
-    Key([win], 'space', lazy.layout.next()),
-    Key([win, 'shift'], 'h', lazy.layout.swap_left()),
-    Key([win, 'shift'], 'l', lazy.layout.swap_right()),
-    Key([win, 'shift'], 'j', lazy.layout.shuffle_down()),
-    Key([win, 'shift'], 'k', lazy.layout.shuffle_up()),
-    Key([win, 'shift'], 'plus', lazy.layout.grow()),
-    Key([win, 'shift'], 'minus', lazy.layout.shrink()),
-    Key([win, 'shift'], 'n', lazy.layout.reset()),
-    Key([win, 'shift'], 'm', lazy.layout.maximize()),
-    Key([win, 'shift'], 'space', lazy.layout.flip()),
+    # Switch between windows
+    Key([mod], "h", lazy.layout.left(), desc="Move focus to left"),
+    Key([mod], "l", lazy.layout.right(), desc="Move focus to right"),
+    Key([mod], "j", lazy.layout.down(), desc="Move focus down"),
+    Key([mod], "k", lazy.layout.up(), desc="Move focus up"),
+    Key([mod], "space", lazy.layout.next(),
+        desc="Move window focus to other window"),
 
-    # Toggle between different layouts
-    Key([win], 'Tab', lazy.next_layout()),
+    # Move windows between left/right columns or move up/down in current stack.
+    # Moving out of range in Columns layout will create new column.
+    Key([mod, "shift"], "h", lazy.layout.shuffle_left(),
+        desc="Move window to the left"),
+    Key([mod, "shift"], "l", lazy.layout.shuffle_right(),
+        desc="Move window to the right"),
+    Key([mod, "shift"], "j", lazy.layout.shuffle_down(),
+        desc="Move window down"),
+    Key([mod, "shift"], "k", lazy.layout.shuffle_up(), desc="Move window up"),
+
+    # Grow windows. If current window is on the edge of screen and direction
+    # will be to screen edge - window would shrink.
+    Key([mod, "control"], "h", lazy.layout.grow_left(),
+        desc="Grow window to the left"),
+    Key([mod, "control"], "l", lazy.layout.grow_right(),
+        desc="Grow window to the right"),
+    Key([mod, "control"], "j", lazy.layout.grow_down(),
+        desc="Grow window down"),
+    Key([mod, "control"], "k", lazy.layout.grow_up(), desc="Grow window up"),
+    Key([mod], "n", lazy.layout.normalize(), desc="Reset all window sizes"),
+
+    # Toggle between split and unsplit sides of stack.
+    # Split = all windows displayed
+    # Unsplit = 1 window displayed, like Max layout, but still with
+    # multiple stack panes
+    Key([mod, "shift"], "Return", lazy.layout.toggle_split(),
+        desc="Toggle between split and unsplit sides of stack"),
+    Key([mod], "Return", lazy.spawn(terminal), desc="Launch terminal"),
+
+    # Toggle between different layouts as defined below
+    Key([mod], "Tab", lazy.next_layout(), desc="Toggle between layouts"),
+    Key([mod], "w", lazy.window.kill(), desc="Kill focused window"),
+
+    Key([mod, "control"], "r", lazy.restart(), desc="Restart Qtile"),
+    Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
+    Key([mod], "r", lazy.spawncmd(),
+        desc="Spawn a command using a prompt widget"),
 
     # Floating Layout Keybinds
-    Key([win], 't', lazy.window.enable_floating()),
-    Key([win, 'shift'], 't', lazy.window.disable_floating()),
-
-    # Window controls (layout agnostic)
-    Key([win], 'w', lazy.window.kill()),
-    Key([win, 'control'], 'r', lazy.restart()),
-    Key([win, 'control'], 'q', lazy.shutdown()),
-    Key([win], 'r', lazy.spawncmd('Run')),
-    Key([win, 'shift'], 'r', lazy.spawn('xfce4-appfinder')),
-    Key([win, 'control'], 'l', lazy.spawn(os.path.join(home, 'bin', 'lock_screen.sh'))),  # lock the screen
-    Key([win, 'control'], 'x', lazy.spawn(os.path.join(home, 'bin', 'dmenu_session_manager'))),
+    Key([mod], 't', lazy.window.enable_floating()),
+    Key([mod, 'shift'], 't', lazy.window.disable_floating()),
 
     # Audio Controls
     Key([], 'XF86AudioRaiseVolume', lazy.spawn('pactl set-sink-volume @DEFAULT_SINK@ +5%')),
@@ -65,33 +83,39 @@ keys = [
     Key([], 'XF86MonBrightnessDown', lazy.spawn('light -U 10')),
 
     # Programs
-    Key([win], 'Return', lazy.spawn('sakura')),
-    Key([win], 'b', lazy.spawn('firefox')),
-    Key([win], 'c', lazy.spawn('sakura -x python')),
-    Key([win], 'e', lazy.spawn('Thunar')),
+    Key([mod], 'Return', lazy.spawn('sakura')),
+    Key([mod], 'b', lazy.spawn('firefox')),
+    Key([mod], 'c', lazy.spawn('sakura -x python')),
+    Key([mod], 'e', lazy.spawn('Thunar')),
 
     # Screenshots
     Key([], 'Print', lazy.spawn('xfce4-screenshooter -f')),
-    Key([alt], 'Print', lazy.spawn('xfce4-screenshooter -w')),
+    Key(['mod1'], 'Print', lazy.spawn('xfce4-screenshooter -w')),
     Key(['control'], 'Print', lazy.spawn('xfce4-screenshooter -r'))
 ]
 
 # on T540p, I use Win+E or folder icon as Print
 if os.uname()[1] == 'nozomi':
-    keys[-4] = Key([win], 'l', lazy.spawn('sakura'))
+    keys[-4] = Key([mod], 'l', lazy.spawn('sakura'))
     for i in range(-3, 0):
-        keys[i].modifiers.append(win)
+        keys[i].modifiers.append(mod)
         keys[i].key = 'e'
 
-groups = [Group(i) for i in '12345678']
+groups = [Group(i) for i in "123456789"]
 
 for i in groups:
     keys.extend([
-        # win1 + letter of group = switch to group
-        Key([win], i.name, lazy.group[i.name].toscreen()),
+        # mod1 + letter of group = switch to group
+        Key([mod], i.name, lazy.group[i.name].toscreen(),
+            desc="Switch to group {}".format(i.name)),
 
-        # win1 + shift + letter of group = switch to & move focused window to group
-        Key([win, 'shift'], i.name, lazy.window.togroup(i.name)),
+        # mod1 + shift + letter of group = switch to & move focused window to group
+        Key([mod, "shift"], i.name, lazy.window.togroup(i.name),
+            desc="Move focused window to group {}".format(i.name)),
+        # Or, use below if you prefer not to switch to that group.
+        # # mod1 + shift + letter of group = move focused window to group
+        # Key([mod, "shift"], i.name, lazy.window.togroup(i.name),
+        #     desc="move focused window to group {}".format(i.name)),
     ])
 
 layouts = [
@@ -118,7 +142,7 @@ widgets = [
         widget.GroupBox(inactive='#a9a9a9', active='#f3f4f5'),
         widget.Prompt(foreground='#00d2ff'),
         widget.WindowName(font='Conduit Pro Bold'),
-        widget.Wttr(format='1', location={'Ballerup': 'Ballerup'}, json=False),
+        widget.Wttr(format='1', location={'Ballerup': 'Ballerup'}),
         widget.Sep(),
         widget.Net(interface='eth0'),  # 5
         widget.Sep(),
@@ -140,7 +164,7 @@ widgets = [
 if num_screens > 1:  # If on desktop pc with dual screens
     screens = [Screen(top=bar.Bar(widgets, 24, background='#400000'))]
     for _ in range(num_screens):
-        screens.append(Screen(top=bar.Bar([widget.GroupBox(inactive='#a9a9a9'), widgets[1],
+        screens.append(Screen(top=bar.Bar([widget.GroupBox(inactive='#a9a9a9', active='#f3f4f5'), widgets[1],
                                            widget.WindowName(font='Conduit Pro Bold')] + widgets[3:14] +
                                           [widget.CurrentLayoutIcon()] + widgets[17:], 24, background='#400000')))
 else:  # If on laptop
@@ -151,38 +175,31 @@ else:  # If on laptop
 
 # Drag floating layouts.
 mouse = [
-    Drag([win], 'Button1', lazy.window.set_position_floating(),
+    Drag([mod], "Button1", lazy.window.set_position_floating(),
          start=lazy.window.get_position()),
-    Drag([win], 'Button3', lazy.window.set_size_floating(),
+    Drag([mod], "Button3", lazy.window.set_size_floating(),
          start=lazy.window.get_size()),
-    Click([win], 'Button2', lazy.window.bring_to_front())
+    Click([mod], "Button2", lazy.window.bring_to_front())
 ]
 
 dgroups_key_binder = None
-dgroups_app_rules = []
-main = None
+dgroups_app_rules = []  # type: List
 follow_mouse_focus = True
 bring_front_click = False
 cursor_warp = False
 floating_layout = layout.Floating(float_rules=[
-    {'wmclass': 'confirm'},
-    {'wmclass': 'dialog'},
-    {'wmclass': 'download'},
-    {'wmclass': 'error'},
-    {'wmclass': 'file_progress'},
-    {'wmclass': 'notification'},
-    {'wmclass': 'splash'},
-    {'wmclass': 'toolbar'},
-    {'wmclass': 'confirmreset'},  # gitk
-    {'wmclass': 'makebranch'},  # gitk
-    {'wmclass': 'maketag'},  # gitk
-    {'wname': 'branchdialog'},  # gitk
-    {'wname': 'pinentry'},  # GPG key password entry
-    {'wmclass': 'ssh-askpass'},  # ssh-askpass
+    # Run the utility of `xprop` to see the wm class and name of an X client.
+    *layout.Floating.default_float_rules,
+    Match(wm_class='confirmreset'),  # gitk
+    Match(wm_class='makebranch'),  # gitk
+    Match(wm_class='maketag'),  # gitk
+    Match(wm_class='ssh-askpass'),  # ssh-askpass
+    Match(title='branchdialog'),  # gitk
+    Match(title='pinentry'),  # GPG key password entry
 ])
 auto_fullscreen = True
-focus_on_window_activation = 'smart'
-
+focus_on_window_activation = "smart"
+reconfigure_screens = True
 
 @hook.subscribe.client_new
 def set_floating(window):
@@ -199,13 +216,16 @@ def floating_dialogs(window):
     if dialog or transient:
         window.floating = True
 
+# If things like steam games want to auto-minimize themselves when losing
+# focus, should we respect this or not?
+auto_minimize = True
 
 # XXX: Gasp! We're lying here. In fact, nobody really uses or cares about this
 # string besides java UI toolkits; you can see several discussions on the
-# mailing lists, github issues, and other WM documentation that suggest setting
+# mailing lists, GitHub issues, and other WM documentation that suggest setting
 # this string if your java app doesn't work correctly. We may as well just lie
 # and say that we're a working one by default.
 #
 # We choose LG3D to maximize irony: it is a 3D non-reparenting WM written in
 # java that happens to be on java's whitelist.
-wmname = 'LG3D'
+wmname = "LG3D"
