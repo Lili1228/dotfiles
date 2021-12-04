@@ -83,9 +83,8 @@ keys = [
     Key([], 'XF86MonBrightnessDown', lazy.spawn('light -U 10')),
 
     # Programs
-    Key([mod], 'Return', lazy.spawn('sakura')),
     Key([mod], 'b', lazy.spawn('firefox')),
-    Key([mod], 'c', lazy.spawn('sakura -x python')),
+    Key([mod], 'c', lazy.spawn(terminal + ' -x python')),
     Key([mod], 'e', lazy.spawn('Thunar')),
 
     # Screenshots
