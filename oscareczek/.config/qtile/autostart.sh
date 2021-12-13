@@ -10,5 +10,5 @@ nm-applet &
 gammastep-indicator -m drm &
 setxkbmap pl
 light-locker --lock-on-suspend &
-wal -i we0w4aea87f51.jpg
+wal -R
 exec expressvpn connect &
