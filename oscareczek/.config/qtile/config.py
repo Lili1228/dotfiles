@@ -157,7 +157,7 @@ widgets = [
         widget.CurrentLayoutIcon(),  # 14
         widget.Sep(padding=10),  # 15
         widget.Systray(),  # 16
-        widget.PulseVolume(emoji=True, limit_max_volume=True, step=5),
+        widget.Volume(emoji=True, step=5),
         widget.Clock(format='%a %Y-%m-%d %R'),
 ]
 
@@ -202,14 +202,6 @@ focus_on_window_activation = "smart"
 reconfigure_screens = True
 
 @hook.subscribe.client_new
-def set_floating(window):
-    window_name = window.window.get_name()
-    floating_windows = ['GitKraken', 'Steam', 'gnome-calculator', 'Elite Dangerous Launcher', 'Discord Updater']
-    if window_name and (window_name in floating_windows or window_name.startswith('Open Database - ')):
-        window.floating = True
-
-
-@hook.subscribe.client_new
 def floating_dialogs(window):
     dialog = window.window.get_wm_type() == 'dialog'
     transient = window.window.get_wm_transient_for()
@@ -225,7 +217,4 @@ auto_minimize = True
 # mailing lists, GitHub issues, and other WM documentation that suggest setting
 # this string if your java app doesn't work correctly. We may as well just lie
 # and say that we're a working one by default.
-#
-# We choose LG3D to maximize irony: it is a 3D non-reparenting WM written in
-# java that happens to be on java's whitelist.
-wmname = "LG3D"
+wmname = 'CWM'
