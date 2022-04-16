@@ -1,26 +1,28 @@
-from typing import List  # noqa: F401
-
-from libqtile import bar, layout, widget, hook
-from libqtile.config import Click, Drag, Group, Key, Match, Screen
+from libqtile import bar, extension, hook, layout, qtile, widget
+from libqtile.config import Group, Key, Screen
 from libqtile.lazy import lazy
 from libqtile.utils import guess_terminal
 import os
 import subprocess
 
-mod = "mod4"
+mod = 'mod4'
 terminal = guess_terminal()
-
-from Xlib import display
-
-d = display.Display()
-s = d.screen()
-r = s.root
-res = r.xrandr_get_screen_resources()._data
 num_screens = 0
-for output in res['outputs']:
-    mon = d.xrandr_get_output_info(output, res['config_timestamp'])._data
-    if mon['num_preferred']:
-        num_screens += 1
+
+if qtile.core.name == 'x11':
+    from Xlib import display
+
+    d = display.Display()
+    s = d.screen()
+    r = s.root
+    res = r.xrandr_get_screen_resources()._data
+    for output in res['outputs']:
+        mon = d.xrandr_get_output_info(output, res['config_timestamp'])._data
+        if mon['num_preferred']:
+            num_screens += 1
+else:
+    num_screens = 1
+
 
 keys = [
     # Switch between windows
@@ -74,14 +76,14 @@ keys = [
     Key([mod, 'shift'], 't', lazy.window.disable_floating()),
 
     # Audio Controls
-    Key([], 'XF86AudioRaiseVolume', lazy.spawn('pactl set-sink-volume @DEFAULT_SINK@ +5%')),
+    Key([], 'XF86AudioRaiseVolume', lazy.spawn('amixer set Master 5%+')),
     Key([], 'XF86AudioLowerVolume', lazy.spawn('pactl set-sink-volume @DEFAULT_SINK@ -5%')),
     Key([], 'XF86AudioMute', lazy.spawn('pactl set-sink-mute @DEFAULT_SINK@ toggle')),
     Key([], 'XF86AudioMicMute', lazy.spawn('pactl set-source-mute @DEFAULT_SOURCE@ toggle')),
 
-    # Screen brightness
-    Key([], 'XF86MonBrightnessUp',   lazy.spawn('light -A 10')),
-    Key([], 'XF86MonBrightnessDown', lazy.spawn('light -U 10')),
+    # Brightness Controls
+    Key([], 'XF86MonBrightnessUp', lazy.spawn('light -T 1.667')),
+    Key([], 'XF86MonBrightnessDown', lazy.spawn('light -T 0.6')),
 
     # Programs
     Key([mod], 'b', lazy.spawn('firefox')),
@@ -91,12 +93,12 @@ keys = [
     # Screenshots
     Key([], 'Print', lazy.spawn('xfce4-screenshooter -f')),
     Key(['mod1'], 'Print', lazy.spawn('xfce4-screenshooter -w')),
-    Key(['control'], 'Print', lazy.spawn('xfce4-screenshooter -r'))
+    Key(['control'], 'Print', lazy.spawn('xfce4-screenshooter -r')),
 ]
 
 # on T540p, I use Win+E or folder icon as Print
 if os.uname()[1] == 'nozomi':
-    keys[-4] = Key([mod], 'l', lazy.spawn('sakura'))
+    keys[-4] = Key([mod], 'l', lazy.spawn(terminal))
     for i in range(-3, 0):
         keys[i].modifiers.append(mod)
         keys[i].key = 'e'
@@ -119,7 +121,7 @@ for i in groups:
     ])
 
 layouts = [
-    layout.MonadTall(align='MonadTail._right', border_width=1, border_focus='#008000'),
+    layout.MonadTall(align='MonadTail._right', border_width=1, border_focus='008000'),
     layout.Max(),
     layout.TreeTab(),
 ]
@@ -139,18 +141,19 @@ widget_defaults = dict(
 extension_defaults = widget_defaults.copy()
 
 widgets = [
-        widget.GroupBox(inactive='#a9a9a9', active='#f3f4f5'),
-        widget.Prompt(foreground='#00d2ff'),
+        widget.GroupBox(inactive='aaaaaa', margin=2,
+                        disable_drag=True, highlight_method='block'),
+        widget.Prompt(foreground='00c0c0'),
         widget.WindowName(font='Conduit Pro Bold'),
         widget.Wttr(format='1', location={'Ballerup': 'Ballerup'}),
         widget.Sep(),
         widget.Net(interface='eth0'),  # 5
         widget.Sep(),
-        widget.CPUGraph(border_color='#c0c5ce',  fill_color='#6790eb', graph_color='#6790eb', border_width=1,
-                        line_width=1, type='box'),  # 7
-        widget.Sep(linewidth=0, padding=5),
-        widget.TextBox('🌡️', foreground='#bc5a03', padding=0),
-        widget.ThermalSensor(foreground_alert='#cd1f3f', padding=3, threshold=80),
+        widget.CPUGraph(border_color='c0c5ce', fill_color='6790eb', graph_color='6790eb',
+                        border_width=1, line_width=1, type='box'),  # 7
+        widget.Spacer(5),
+        widget.TextBox('🌡️', padding=0),
+        widget.ThermalSensor(padding=3, threshold=80),
         widget.Sep(),
         widget.Memory(update_interval=5),
         widget.Sep(padding=10),
@@ -158,59 +161,24 @@ widgets = [
         widget.Sep(padding=10),  # 15
         widget.Systray(),  # 16
         widget.Volume(emoji=True, step=5),
-        widget.Clock(format='%a %Y-%m-%d %R'),
+        widget.Clock(format='%a %F %R'),
 ]
 
 if num_screens > 1:  # If on desktop pc with dual screens
-    screens = [Screen(top=bar.Bar(widgets, 24, background='#400000'))]
+    screens = [Screen(top=bar.Bar(widgets, 24, background='400000'))]
     for _ in range(num_screens):
-        screens.append(Screen(top=bar.Bar([widget.GroupBox(inactive='#a9a9a9', active='#f3f4f5'), widgets[1],
-                                           widget.WindowName(font='Conduit Pro Bold')] + widgets[3:14] +
-                                          [widget.CurrentLayoutIcon()] + widgets[17:], 24, background='#400000')))
+        screens.append(
+            Screen(
+                top=bar.Bar(
+                    [widget.GroupBox(inactive='aaaaaa', margin=2,
+                                     disable_drag=True, highlight_method='block'), widgets[1],
+                     widget.WindowName(font='Conduit Pro Bold')] + widgets[3:14] +
+                    [widget.CurrentLayoutIcon()] + widgets[17:], 24, background='400000')))
 else:  # If on laptop
     widgets[5] = widget.Net(format='{down} ↓↑ {up}')
     widgets[7] = widget.CPU(format='{load_percent}% ({freq_current}GHz)')
-    widgets.insert(17, widget.BatteryIcon())
-    screens = [Screen(top=bar.Bar(widgets, 24, background='#400000'))]
-
-# Drag floating layouts.
-mouse = [
-    Drag([mod], "Button1", lazy.window.set_position_floating(),
-         start=lazy.window.get_position()),
-    Drag([mod], "Button3", lazy.window.set_size_floating(),
-         start=lazy.window.get_size()),
-    Click([mod], "Button2", lazy.window.bring_to_front())
-]
-
-dgroups_key_binder = None
-dgroups_app_rules = []  # type: List
-follow_mouse_focus = True
-bring_front_click = False
-cursor_warp = False
-floating_layout = layout.Floating(float_rules=[
-    # Run the utility of `xprop` to see the wm class and name of an X client.
-    *layout.Floating.default_float_rules,
-    Match(wm_class='confirmreset'),  # gitk
-    Match(wm_class='makebranch'),  # gitk
-    Match(wm_class='maketag'),  # gitk
-    Match(wm_class='ssh-askpass'),  # ssh-askpass
-    Match(title='branchdialog'),  # gitk
-    Match(title='pinentry'),  # GPG key password entry
-])
-auto_fullscreen = True
-focus_on_window_activation = "smart"
-reconfigure_screens = True
-
-@hook.subscribe.client_new
-def floating_dialogs(window):
-    dialog = window.window.get_wm_type() == 'dialog'
-    transient = window.window.get_wm_transient_for()
-    if dialog or transient:
-        window.floating = True
-
-# If things like steam games want to auto-minimize themselves when losing
-# focus, should we respect this or not?
-auto_minimize = True
+    widgets.insert(17, widget.BatteryIcon(theme_path='/usr/share/icons/Yaru++-Dark/status/16'))
+    screens = [Screen(top=bar.Bar(widgets, 24, background='400000'))]
 
 # XXX: Gasp! We're lying here. In fact, nobody really uses or cares about this
 # string besides java UI toolkits; you can see several discussions on the
@@ -218,3 +186,4 @@ auto_minimize = True
 # this string if your java app doesn't work correctly. We may as well just lie
 # and say that we're a working one by default.
 wmname = 'CWM'
+os.environ['QT_QPA_PLATFORMTHEME'] = 'qt5ct'

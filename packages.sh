@@ -1,4 +1,4 @@
 #!/bin/sh
 if [ -x /bin/pacman ]; then
-    pacman -Syu feh gammastep-indicator mpv python-psutil qtile xfce4-clipman
+    sudo pacman -Syu feh gammastep-indicator mpv python-dbus-next python-psutil qtile
 fi
