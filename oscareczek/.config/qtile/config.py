@@ -25,6 +25,7 @@ else:
 
 
 keys = [
+    Key([mod], 'u', lazy.group.unminimize_all(), desc='Unminimize all windows'),
     # Switch between windows
     Key([mod], "h", lazy.layout.left(), desc="Move focus to left"),
     Key([mod], "l", lazy.layout.right(), desc="Move focus to right"),
