@@ -25,7 +25,6 @@ else:
 
 
 keys = [
-    Key([mod], 'u', lazy.group.unminimize_all(), desc='Unminimize all windows'),
     # Switch between windows
     Key([mod], "h", lazy.layout.left(), desc="Move focus to left"),
     Key([mod], "l", lazy.layout.right(), desc="Move focus to right"),
@@ -187,4 +186,5 @@ else:  # If on laptop
 # this string if your java app doesn't work correctly. We may as well just lie
 # and say that we're a working one by default.
 wmname = 'CWM'
+auto_minimize = False
 os.environ['QT_QPA_PLATFORMTHEME'] = 'qt5ct'
