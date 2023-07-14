@@ -21,7 +21,7 @@ if qtile.core.name == 'x11':
         if mon['num_preferred']:
             num_screens += 1
 else:
-    num_screens = 1
+    num_screens = len(qtile.core.outputs)
 
 
 keys = [
@@ -160,7 +160,7 @@ widgets = [
         widget.CurrentLayoutIcon(),  # 14
         widget.Sep(padding=10),  # 15
         widget.Systray(),  # 16
-        widget.Volume(emoji=True, step=5),
+        widget.PulseVolume(emoji=True, limit_max_volume=True, step=5),
         widget.Clock(format='%a %F %R'),
 ]
 
@@ -187,4 +187,4 @@ else:  # If on laptop
 # and say that we're a working one by default.
 wmname = 'CWM'
 auto_minimize = False
-os.environ['QT_QPA_PLATFORMTHEME'] = 'qt5ct'
+os.environ['QT_QPA_PLATFORMTHEME'] = 'qt6ct'
