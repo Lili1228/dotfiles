@@ -135,7 +135,7 @@ def autostart():
 
 widget_defaults = dict(
     font='Conduit Pro',
-    fontsize=14,
+    fontsize=16, # font I'm using is smaller than usual, 14 would be fine normally
     padding=2,
 )
 extension_defaults = widget_defaults.copy()
