@@ -5,4 +5,4 @@ setxkbmap pl
 wal -i we0w4aea87f51.jpg
 xfce4-power-manager --daemon
 gammastep-indicator &
-exec expressvpn connect &
+exec gnome-keyring-daemon --start
