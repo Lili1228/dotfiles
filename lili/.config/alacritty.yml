@@ -15,22 +15,22 @@ font:
 colors:
   primary:
     background: '#000000'
-    foreground: '#c0c0c0'
-    dim_foreground: '#808080'
+    foreground: '#aaaaaa'
+    dim_foreground: '#555555'
     bright_foreground: '#ffffff'
 
   normal:
     black: '#000000'
-    red: '#800000'
-    green: '#008000'
-    yellow: '#808000'
-    blue: '#000080'
-    magenta: '#800080'
-    cyan: '#008080'
-    white: '#c0c0c0'
+    red: '#aa0000'
+    green: '#00aa00'
+    yellow: '#aaaa00'
+    blue: '#0000aa'
+    magenta: '#aa00aa'
+    cyan: '#00aaaa'
+    white: '#aaaaaa'
 
   bright:
-    black: '#808080'
+    black: '#555555'
     red: '#ff0000'
     green: '#00ff00'
     yellow: '#ffff00'
