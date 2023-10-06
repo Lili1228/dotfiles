@@ -102,7 +102,7 @@ widgets = [
         widget.CurrentLayoutIcon(),  # 14
         widget.Sep(padding=10),  # 15
         StatusNotifier(menu_font='Conduit Pro', menu_fontsize=14),  # 16
-        widget.Volume(emoji=True, step=5),
+        widget.PulseVolume(emoji=True, limit_max_volume=True, step=5),
         widget.Clock(format='%a %F %R'),
 ]
 
