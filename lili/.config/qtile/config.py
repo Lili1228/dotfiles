@@ -74,23 +74,6 @@ keys = [
     Key(['control'], 'Print', lazy.spawn('xfce4-screenshooter -r')),
 ]
 
-# on T540p, I use Win+E or folder icon as Print
-if os.uname()[1] == 'nozomi':
-    keys[-4] = Key([mod], 'l', lazy.spawn(terminal))
-    for i in range(-3, 0):
-        keys[i].modifiers.append(mod)
-        keys[i].key = 'e'
-
-groups = [Group(i) for i in '123456789']
-
-for i in groups:
-    keys.extend([
-        Key([mod], i.name, lazy.group[i.name].toscreen(),
-            desc='Switch to group {}'.format(i.name)),
-        Key([mod, 'shift'], i.name, lazy.window.togroup(i.name),
-            desc='Move focused window to group {}'.format(i.name))
-    ])
-
 layouts = [
     layout.Columns(border_focus='008000', border_width=1),
     layout.Max()
@@ -136,9 +119,32 @@ if qtile.core.name == 'x11':
             num_screens += 1
 else:
     from libqtile.backend.wayland import InputConfig
+    num_screens = len(qtile.core.outputs)
+
     # keyboard layout
     wl_input_rules = {'type:keyboard': InputConfig(kb_layout='pl')}
-    num_screens = len(qtile.core.outputs)
+
+    #TODO: find better screenshotting for this
+    path = os.path.expanduser('~/.config/qtile/screenshot.sh')
+    keys[-3] = Key([], 'Print', lazy.spawn(path))
+    keys[-2] = Key(['mod1'], 'Print', lazy.spawn(path + ' alt'))
+    keys[-1] = Key(['control'], 'Print', lazy.spawn(path + ' ctrl'))
+
+# on T540p, I use Win+E or folder icon as Print
+if os.uname()[1] == 'nozomi':
+    keys[-4] = Key([mod], 'l', lazy.spawn(terminal))
+    for i in range(-3, 0):
+        keys[i].modifiers.append(mod)
+        keys[i].key = 'e'
+groups = [Group(i) for i in '123456789']
+
+for i in groups:
+    keys.extend([
+        Key([mod], i.name, lazy.group[i.name].toscreen(),
+            desc='Switch to group {}'.format(i.name)),
+        Key([mod, 'shift'], i.name, lazy.window.togroup(i.name),
+            desc='Move focused window to group {}'.format(i.name))
+    ])
 
 bgcolor='402030'
 
