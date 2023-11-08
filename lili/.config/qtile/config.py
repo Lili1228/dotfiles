@@ -179,7 +179,7 @@ auto_minimize = False
 # this string if your java app doesn't work correctly. We may as well just lie
 # and say that we're a working one by default.
 wmname = 'CWM'
-os.environ['QT_QPA_PLATFORMTHEME'] = 'qt6ct'
+os.environ['QT_QPA_PLATFORMTHEME'] = 'qt5gtk2'
 
 @hook.subscribe.startup_once
 def autostart():
